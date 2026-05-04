@@ -1,0 +1,2889 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2e7d6b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Аудит рабочего места — ИБ</title>
+  <style>
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    :root {
+      --ink: #1e293b;
+      --muted: #64748b;
+      --brand: #0f766e;
+      --brand-light: #14b8a6;
+      --wall-a: #e8f5ef;
+      --wall-b: #d4ede4;
+      --wall-c: #c5e6d8;
+      --desk: #f7f6f4;
+      --desk-edge: #e3e1dd;
+      --card: #ffffff;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 4px 24px rgba(15, 118, 110, 0.08), 0 1px 3px rgba(0,0,0,.06);
+      --shadow-lift: 0 20px 50px rgba(15, 23, 42, 0.12);
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+      background: linear-gradient(165deg, #f0fdf9 0%, #ecfdf5 35%, #f1f5f9 100%);
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding:
+        max(16px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+      touch-action: manipulation;
+    }
+    .panel {
+      width: 100%;
+      max-width: 640px;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 24px 24px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(15, 118, 110, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--brand) 0%, var(--brand-light) 50%, #5eead4 100%);
+    }
+    .panel h1 {
+      margin: 0 0 12px;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+    }
+    .panel p {
+      margin: 0 0 12px;
+      font-size: 1.03rem;
+      line-height: 1.55;
+      color: #334155;
+    }
+    .panel p:last-of-type { margin-bottom: 0; }
+    .panel.success {
+      background: linear-gradient(180deg, #f0fdf4 0%, #fff 100%);
+      border-color: #86efac;
+    }
+    .btn {
+      margin-top: 14px;
+      padding: 12px 24px;
+      font-size: 15px;
+      border: none;
+      border-radius: 11px;
+      background: linear-gradient(180deg, #0d9488 0%, var(--brand) 100%);
+      color: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(15, 118, 110, 0.35);
+    }
+    .btn:hover { filter: brightness(1.06); }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: none;
+    }
+    .btn-wrap { text-align: center; }
+    .hidden { display: none !important; }
+    .progress {
+      width: 100%;
+      max-width: 640px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .progress-main {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #0f766e;
+      letter-spacing: -0.01em;
+    }
+    .progress-sub {
+      margin-top: 6px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .scene-wrap {
+      width: 100%;
+      max-width: 640px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lift), 0 0 0 1px rgba(255,255,255,.8) inset;
+      background: linear-gradient(145deg, #dfe8e4 0%, #c8d9d0 100%);
+    }
+    .scene {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 11;
+      background:
+        radial-gradient(ellipse 70% 45% at 88% 12%, rgba(255,255,255,.65) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 35% at 12% 18%, rgba(255,255,255,.4) 0%, transparent 50%),
+        linear-gradient(180deg, var(--wall-a) 0%, var(--wall-b) 45%, var(--wall-c) 100%);
+    }
+    .desk {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 52%;
+      background: linear-gradient(180deg, var(--desk) 0%, #eeede9 40%, var(--desk-edge) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+      border-top: 1px solid rgba(148, 163, 184, 0.35);
+    }
+    .desk-shine {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 48%;
+      height: 35%;
+      background: linear-gradient(88deg, transparent 0%, rgba(255,255,255,.12) 45%, transparent 90%);
+      pointer-events: none;
+    }
+    .kbd-graphic {
+      position: absolute;
+      left: 18%;
+      bottom: 33%;
+      width: 42%;
+      height: 8.5%;
+      z-index: 2;
+      pointer-events: none;
+      transform: perspective(420px) rotateX(6deg);
+      transform-origin: center bottom;
+    }
+    .kbd-base {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+      border-radius: 6px;
+      box-shadow:
+        0 4px 0 #cbd5e1,
+        0 8px 20px rgba(15, 23, 42, 0.12),
+        inset 0 1px 0 #fff;
+      border: 1px solid #cbd5e1;
+    }
+    .kbd-keys {
+      position: absolute;
+      left: 3%;
+      right: 3%;
+      top: 18%;
+      bottom: 22%;
+      background: repeating-linear-gradient(
+        90deg,
+        #94a3b8 0px,
+        #94a3b8 5px,
+        transparent 5px,
+        transparent 8px
+      );
+      opacity: 0.35;
+      border-radius: 3px;
+    }
+    .mouse-graphic {
+      position: absolute;
+      left: 62%;
+      right: auto;
+      bottom: 33.5%;
+      width: 7%;
+      height: 10%;
+      z-index: 7;
+      pointer-events: none;
+    }
+    .mouse-body {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 60%, #cbd5e1 100%);
+      border-radius: 42% 42% 45% 45%;
+      box-shadow:
+        inset 0 -6px 10px rgba(0,0,0,.08),
+        0 4px 10px rgba(15, 23, 42, 0.15);
+      border: 1px solid #cbd5e1;
+    }
+    .mouse-body::after {
+      content: "";
+      position: absolute;
+      top: 8%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 22%;
+      height: 18%;
+      background: #cbd5e1;
+      border-radius: 40%;
+    }
+    .frame-graphic {
+      position: absolute;
+      left: 5%;
+      bottom: 32%;
+      width: 11%;
+      height: 20%;
+      z-index: 2;
+      pointer-events: none;
+      transform: rotate(-6deg);
+    }
+    .frame-border {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, #fef3c7 0%, #d4a574 35%, #a16207 100%);
+      border-radius: 4px;
+      padding: 6%;
+      box-shadow: 3px 6px 16px rgba(0,0,0,.18);
+    }
+    .frame-photo {
+      position: absolute;
+      inset: 8%;
+      background: linear-gradient(165deg, #e0f2fe 0%, #bae6fd 55%, #7dd3fc 100%);
+      border-radius: 2px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.6);
+      overflow: hidden;
+    }
+    .frame-mini-duo {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 9%;
+      padding: 10% 10% 11%;
+      background:
+        radial-gradient(ellipse 70% 55% at 50% 88%, rgba(255, 255, 255, 0.55) 0%, transparent 55%),
+        linear-gradient(175deg, #f8fafc 0%, #e0f2fe 42%, #bae6fd 100%);
+    }
+    .mini-cat {
+      position: relative;
+      width: 34%;
+      height: 76%;
+      flex-shrink: 0;
+    }
+    .mini-cat__ear {
+      position: absolute;
+      z-index: 2;
+      top: 0;
+      width: 28%;
+      height: 22%;
+      background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+      border-radius: 40% 60% 10% 40%;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+    .mini-cat__ear--l {
+      left: 4%;
+      transform: rotate(-28deg);
+    }
+    .mini-cat__ear--r {
+      right: 4%;
+      transform: rotate(28deg) scaleX(-1);
+    }
+    .mini-cat__head {
+      position: absolute;
+      top: 6%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 82%;
+      height: 44%;
+      background: radial-gradient(ellipse 70% 60% at 45% 35%, #fed7aa 0%, #fb923c 55%, #ea580c 100%);
+      border-radius: 50%;
+      box-shadow:
+        inset 0 -3px 6px rgba(194, 65, 12, 0.2),
+        0 2px 4px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+    }
+    .mini-cat__head::before {
+      content: "";
+      position: absolute;
+      top: 40%;
+      left: 26%;
+      width: 9%;
+      height: 11%;
+      background: #292524;
+      border-radius: 50%;
+      box-shadow: 11px 0 0 #292524;
+    }
+    .mini-cat__head::after {
+      content: "";
+      position: absolute;
+      bottom: 22%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14%;
+      height: 8%;
+      background: #fda4af;
+      border-radius: 40%;
+    }
+    .mini-cat__body {
+      position: absolute;
+      bottom: 2%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92%;
+      height: 52%;
+      background: linear-gradient(165deg, #fb923c 0%, #ea580c 55%, #c2410c 100%);
+      border-radius: 48% 48% 42% 42%;
+      box-shadow:
+        inset -3px -5px 8px rgba(0, 0, 0, 0.12),
+        0 2px 3px rgba(0, 0, 0, 0.06);
+    }
+    .mini-cat__body::before {
+      content: "";
+      position: absolute;
+      left: 18%;
+      top: 28%;
+      right: 18%;
+      height: 2px;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(127, 29, 29, 0.35) 0 3px,
+        transparent 3px 7px
+      );
+      border-radius: 1px;
+    }
+    .mini-cat__tail {
+      position: absolute;
+      bottom: 18%;
+      right: -4%;
+      width: 22%;
+      height: 38%;
+      border-right: 3px solid #ea580c;
+      border-radius: 0 50% 40% 0;
+      transform: rotate(6deg);
+      opacity: 0.9;
+    }
+    .mini-cat--cream .mini-cat__ear {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 55%, #fbbf24 100%);
+    }
+    .mini-cat--cream .mini-cat__head {
+      background: radial-gradient(ellipse 70% 60% at 45% 35%, #fffbeb 0%, #fef3c7 45%, #fde68a 100%);
+    }
+    .mini-cat--cream .mini-cat__body {
+      background: linear-gradient(165deg, #fffbeb 0%, #fef3c7 40%, #fde68a 75%, #eab308 100%);
+    }
+    .mini-cat--cream .mini-cat__body::before {
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(217, 119, 6, 0.22) 0 3px,
+        transparent 3px 7px
+      );
+    }
+    .mini-cat--cream .mini-cat__tail {
+      border-right-color: #fbbf24;
+    }
+    .mini-cat--face-left {
+      transform: scaleX(-1);
+    }
+    .mini-cat--fluffy .mini-cat__head {
+      width: 86%;
+      height: 46%;
+      border-radius: 50% 50% 48% 48%;
+    }
+    .mini-cat--fluffy .mini-cat__body {
+      width: 96%;
+      height: 54%;
+      border-radius: 52% 52% 42% 42%;
+      box-shadow:
+        inset -2px -5px 8px rgba(0, 0, 0, 0.08),
+        inset 3px 3px 0 rgba(255, 255, 255, 0.35),
+        0 2px 3px rgba(0, 0, 0, 0.06);
+    }
+    .mini-cat--fluffy .mini-cat__ear {
+      height: 24%;
+    }
+    .mini-cat--cream.mini-cat--fluffy .mini-cat__head {
+      width: 88%;
+      height: 48%;
+      box-shadow:
+        inset 0 -3px 5px rgba(251, 191, 36, 0.22),
+        inset 3px 3px 0 rgba(255, 255, 255, 0.5);
+    }
+    .mini-cat--cream.mini-cat--fluffy .mini-cat__body {
+      width: 98%;
+      height: 58%;
+      border-radius: 54% 54% 40% 40%;
+    }
+    .mini-cat--cream.mini-cat--fluffy .mini-cat__tail {
+      width: 26%;
+      height: 42%;
+    }
+    .mini-cat--ginger-rich .mini-cat__head {
+      background: radial-gradient(ellipse 70% 60% at 45% 32%, #fdba74 0%, #ea580c 50%, #c2410c 100%);
+    }
+    .mini-cat--ginger-rich .mini-cat__body {
+      background: linear-gradient(165deg, #fb923c 0%, #ea580c 45%, #9a3412 100%);
+    }
+    .mini-cat--ginger-rich .mini-cat__ear {
+      background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    }
+    .water-can-graphic {
+      position: absolute;
+      right: 13.5%;
+      bottom: 39%;
+      width: 8%;
+      height: 20%;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .water-can-body {
+      position: absolute;
+      left: 12%;
+      bottom: 8%;
+      width: 62%;
+      height: 52%;
+      background: linear-gradient(145deg, #94a3b8 0%, #64748b 45%, #475569 100%);
+      border-radius: 10% 10% 35% 35%;
+      box-shadow:
+        inset 2px 2px 0 rgba(255, 255, 255, 0.2),
+        inset -2px -4px 6px rgba(0, 0, 0, 0.15),
+        0 4px 8px rgba(15, 23, 42, 0.2);
+    }
+    .water-can-spout {
+      position: absolute;
+      top: 18%;
+      right: 4%;
+      width: 48%;
+      height: 14%;
+      background: linear-gradient(180deg, #94a3b8, #64748b);
+      border-radius: 0 40% 40% 0;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+    .water-can-neck {
+      position: absolute;
+      top: 28%;
+      right: 38%;
+      width: 18%;
+      height: 12%;
+      background: #64748b;
+      border-radius: 2px;
+    }
+    .water-can-handle {
+      position: absolute;
+      left: 0;
+      top: 32%;
+      width: 28%;
+      height: 42%;
+      border: 3px solid #64748b;
+      border-right: none;
+      border-radius: 50% 0 0 50%;
+      box-sizing: border-box;
+      opacity: 0.95;
+    }
+    .water-can-top {
+      position: absolute;
+      top: 8%;
+      left: 28%;
+      width: 36%;
+      height: 14%;
+      background: linear-gradient(180deg, #cbd5e1, #94a3b8);
+      border-radius: 4px 4px 2px 2px;
+    }
+    .water-stream {
+      position: absolute;
+      top: 32%;
+      right: -8%;
+      width: 10%;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+      border-radius: 0 0 40% 40%;
+      background: linear-gradient(180deg, rgba(125, 211, 252, 0.95), rgba(56, 189, 248, 0.35));
+      filter: blur(0.3px);
+    }
+    .water-can-graphic.is-pouring {
+      animation: waterCanPourTilt 0.75s ease-out;
+    }
+    .water-can-graphic.is-pouring .water-stream {
+      animation: waterStreamFlow 0.75s ease-out forwards;
+    }
+    @keyframes waterCanPourTilt {
+      0%, 100% { transform: translate(0, 0); }
+      40% { transform: translate(-4%, 3%) rotate(-16deg); }
+      55% { transform: translate(-3%, 2%) rotate(-14deg); }
+    }
+    @keyframes waterStreamFlow {
+      0% {
+        height: 0;
+        opacity: 0;
+      }
+      25% {
+        opacity: 0.95;
+      }
+      45% {
+        height: 55%;
+        opacity: 0.9;
+      }
+      100% {
+        height: 70%;
+        opacity: 0;
+      }
+    }
+    .plant-graphic {
+      position: absolute;
+      right: 2.5%;
+      bottom: 37%;
+      width: 11%;
+      height: 30%;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .fl-pot {
+      position: absolute;
+      bottom: 0;
+      left: 6%;
+      right: 6%;
+      height: 27%;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.35) 0%, transparent 35%, transparent 65%, rgba(255, 255, 255, 0.2) 100%),
+        linear-gradient(180deg, #fda4af 0%, #fb7185 40%, #e11d48 100%);
+      clip-path: polygon(5% 0, 95% 0, 100% 100%, 0 100%);
+      box-shadow:
+        inset 0 3px 0 rgba(255, 255, 255, 0.45),
+        0 5px 14px rgba(225, 29, 72, 0.25);
+      border-radius: 0 0 3px 3px;
+    }
+    .fl-soil {
+      position: absolute;
+      bottom: 23%;
+      left: 14%;
+      right: 14%;
+      height: 7%;
+      background: radial-gradient(ellipse 90% 100% at 50% 0%, #44403c 0%, #292524 100%);
+      border-radius: 50%;
+    }
+    .fl-plant {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 26%;
+      top: 0;
+    }
+    .fl-stem {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 10%;
+      height: 58%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #86efac 0%, #22c55e 35%, #15803d 70%, #166534 100%);
+      border-radius: 40%;
+      box-shadow:
+        inset 2px 0 4px rgba(255, 255, 255, 0.35),
+        inset -2px 0 6px rgba(0, 0, 0, 0.12);
+    }
+    .fl-leaf {
+      position: absolute;
+      border-radius: 50% 40% 55% 45%;
+      background:
+        radial-gradient(ellipse 90% 80% at 25% 30%, rgba(255, 255, 255, 0.75) 0%, transparent 42%),
+        radial-gradient(ellipse 70% 60% at 70% 70%, #ddd6fe 0%, transparent 50%),
+        linear-gradient(155deg, #ecfccb 0%, #bef264 25%, #86efac 55%, #34d399 92%, #059669 100%);
+      box-shadow:
+        inset 3px 4px 8px rgba(255, 255, 255, 0.55),
+        inset -4px -6px 12px rgba(5, 150, 105, 0.2),
+        0 3px 8px rgba(15, 23, 42, 0.12);
+      filter: saturate(1.08);
+    }
+    .fl-leaf--1 {
+      --leaf-rot: -38deg;
+      width: 42%;
+      height: 22%;
+      bottom: 18%;
+      left: 4%;
+      transform: rotate(var(--leaf-rot));
+    }
+    .fl-leaf--2 {
+      --leaf-rot: 42deg;
+      width: 46%;
+      height: 24%;
+      bottom: 32%;
+      right: 2%;
+      transform: rotate(var(--leaf-rot));
+    }
+    .fl-leaf--3 {
+      --leaf-rot: 12deg;
+      width: 38%;
+      height: 20%;
+      bottom: 8%;
+      right: 18%;
+      transform: rotate(var(--leaf-rot));
+    }
+    .fl-leaf--4 {
+      --leaf-rot: -18deg;
+      width: 40%;
+      height: 21%;
+      bottom: 38%;
+      left: 8%;
+      transform: rotate(var(--leaf-rot));
+    }
+    .fl-bloom {
+      position: absolute;
+      bottom: 52%;
+      left: 50%;
+      width: 62%;
+      height: 42%;
+      transform: translateX(-50%);
+      z-index: 3;
+    }
+    .fl-petal {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 38%;
+      height: 48%;
+      margin: -24% 0 0 -19%;
+      border-radius: 50% 50% 48% 52%;
+      background:
+        conic-gradient(from 210deg at 50% 55%, #fce7f3, #fbcfe8, #e9d5ff, #ddd6fe, #cffafe, #fef9c3, #fce7f3);
+      box-shadow:
+        inset 4px 6px 12px rgba(255, 255, 255, 0.65),
+        inset -3px -8px 14px rgba(190, 24, 93, 0.12),
+        0 2px 6px rgba(15, 23, 42, 0.1);
+      transform-origin: 50% 85%;
+    }
+    .fl-petal--1 { transform: rotate(0deg); }
+    .fl-petal--2 { transform: rotate(60deg); }
+    .fl-petal--3 { transform: rotate(120deg); }
+    .fl-petal--4 { transform: rotate(180deg); }
+    .fl-petal--5 { transform: rotate(240deg); }
+    .fl-petal--6 { transform: rotate(300deg); }
+    .fl-heart {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 28%;
+      height: 28%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 30%, #fffbeb 0%, #fef08a 35%, #facc15 70%, #eab308 100%);
+      box-shadow:
+        inset 0 -4px 8px rgba(202, 138, 4, 0.35),
+        0 0 0 2px rgba(253, 224, 71, 0.5),
+        0 4px 12px rgba(234, 179, 8, 0.35);
+      z-index: 4;
+    }
+    .fl-prt {
+      z-index: 2;
+    }
+    .plant-graphic.dropped .fl-leaf.fl-prt {
+      animation: flLeafFall 0.88s ease-in forwards;
+    }
+    .plant-graphic.dropped .fl-parts .fl-leaf.fl-prt:nth-child(1) { animation-delay: 0s; }
+    .plant-graphic.dropped .fl-parts .fl-leaf.fl-prt:nth-child(2) { animation-delay: 0.06s; }
+    .plant-graphic.dropped .fl-parts .fl-leaf.fl-prt:nth-child(3) { animation-delay: 0.12s; }
+    .plant-graphic.dropped .fl-parts .fl-leaf.fl-prt:nth-child(4) { animation-delay: 0.18s; }
+    @keyframes flLeafFall {
+      0% {
+        transform: rotate(var(--leaf-rot)) translate(0, 0);
+        opacity: 1;
+      }
+      100% {
+        transform: rotate(var(--leaf-rot)) translate(var(--fl-dx, 4px), 36px);
+        opacity: 0;
+      }
+    }
+    .plant-graphic.dropped .fl-leaf--1,
+    .plant-graphic.dropped .fl-leaf--4 {
+      --fl-dx: -10px;
+    }
+    .plant-graphic.dropped .fl-leaf--2,
+    .plant-graphic.dropped .fl-leaf--3 {
+      --fl-dx: 12px;
+    }
+    .plant-graphic.dropped .fl-petal {
+      animation: flPetalWilt 0.75s ease-in forwards;
+    }
+    .plant-graphic.dropped .fl-petal--1 { animation-delay: 0.02s; }
+    .plant-graphic.dropped .fl-petal--2 { animation-delay: 0.06s; }
+    .plant-graphic.dropped .fl-petal--3 { animation-delay: 0.1s; }
+    .plant-graphic.dropped .fl-petal--4 { animation-delay: 0.14s; }
+    .plant-graphic.dropped .fl-petal--5 { animation-delay: 0.18s; }
+    .plant-graphic.dropped .fl-petal--6 { animation-delay: 0.22s; }
+    .plant-graphic.dropped .fl-heart {
+      animation: flHeartWilt 0.65s ease-in 0.12s forwards;
+    }
+    @keyframes flPetalWilt {
+      0% {
+        opacity: 1;
+        filter: saturate(1) brightness(1);
+      }
+      100% {
+        opacity: 0;
+        filter: saturate(0.3) blur(3px);
+      }
+    }
+    @keyframes flHeartWilt {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -35%) scale(0.55);
+      }
+    }
+    .plant-graphic.growing-leaves .fl-leaf.fl-prt {
+      animation: flLeafGrow 0.78s ease-out both forwards;
+    }
+    .plant-graphic.growing-leaves .fl-parts .fl-leaf.fl-prt:nth-child(1) { animation-delay: 0s; }
+    .plant-graphic.growing-leaves .fl-parts .fl-leaf.fl-prt:nth-child(2) { animation-delay: 0.07s; }
+    .plant-graphic.growing-leaves .fl-parts .fl-leaf.fl-prt:nth-child(3) { animation-delay: 0.14s; }
+    .plant-graphic.growing-leaves .fl-parts .fl-leaf.fl-prt:nth-child(4) { animation-delay: 0.21s; }
+    .plant-graphic.growing-leaves .fl-petal {
+      animation: flPetalBloom 0.72s ease-out both forwards;
+    }
+    .plant-graphic.growing-leaves .fl-petal--1 { animation-delay: 0.04s; }
+    .plant-graphic.growing-leaves .fl-petal--2 { animation-delay: 0.1s; }
+    .plant-graphic.growing-leaves .fl-petal--3 { animation-delay: 0.16s; }
+    .plant-graphic.growing-leaves .fl-petal--4 { animation-delay: 0.22s; }
+    .plant-graphic.growing-leaves .fl-petal--5 { animation-delay: 0.28s; }
+    .plant-graphic.growing-leaves .fl-petal--6 { animation-delay: 0.34s; }
+    .plant-graphic.growing-leaves .fl-heart {
+      animation: flHeartBloom 0.55s ease-out 0.2s both forwards;
+    }
+    @keyframes flLeafGrow {
+      0% {
+        opacity: 0;
+        transform: rotate(var(--leaf-rot)) scale(0.2) translateY(28px);
+      }
+      100% {
+        opacity: 1;
+        transform: rotate(var(--leaf-rot)) scale(1) translateY(0);
+      }
+    }
+    @keyframes flPetalBloom {
+      0% {
+        opacity: 0;
+        filter: saturate(0.5) blur(2px);
+      }
+      100% {
+        opacity: 1;
+        filter: saturate(1.08) blur(0);
+      }
+    }
+    @keyframes flHeartBloom {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+    .plant-graphic.plant-pulse {
+      animation: plantWaterPulse 0.85s ease;
+    }
+    @keyframes plantWaterPulse {
+      0%, 100% { filter: brightness(1) saturate(1); }
+      45% { filter: brightness(1.14) saturate(1.22); }
+    }
+    .scene-desk-label {
+      position: absolute;
+      z-index: 12;
+      max-width: 28%;
+      padding: 2px 5px;
+      font-size: clamp(5px, 0.75vmin, 9px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #1e293b;
+      background: rgba(255, 255, 255, 0.82);
+      border-radius: 3px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+      pointer-events: none;
+    }
+    .scene-desk-label--paper {
+      left: 37%;
+      bottom: 6%;
+      transform: rotate(3deg);
+    }
+    .scene-desk-label--notebook {
+      left: auto;
+      right: 24%;
+      bottom: 8%;
+      transform: rotate(8deg);
+      max-width: 20%;
+    }
+    .scene-desk-label--diary {
+      left: 10%;
+      bottom: 8.5%;
+      transform: rotate(-2deg);
+    }
+    .notebook-graphic {
+      position: absolute;
+      right: 23%;
+      bottom: 12%;
+      width: 14%;
+      height: 16%;
+      z-index: 4;
+      pointer-events: none;
+      transform: rotate(8deg);
+    }
+    .notebook-cover {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+      border-radius: 3px 6px 6px 3px;
+      box-shadow: 3px 5px 12px rgba(30, 58, 138, 0.35);
+    }
+    .notebook-spine {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 14%;
+      background: repeating-linear-gradient(
+        180deg,
+        #e2e8f0 0px,
+        #e2e8f0 3px,
+        #94a3b8 3px,
+        #94a3b8 4px
+      );
+      border-radius: 3px 0 0 3px;
+    }
+    .notebook-lines {
+      position: absolute;
+      left: 22%;
+      right: 8%;
+      top: 14%;
+      bottom: 12%;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 4px,
+        rgba(255,255,255,.25) 4px,
+        rgba(255,255,255,.25) 5px
+      );
+    }
+    .monitor-unit {
+      position: absolute;
+      left: 29%;
+      width: 42%;
+      bottom: 42%;
+      height: 40%;
+      z-index: 3;
+    }
+    .monitor-frame {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 14%;
+      background: linear-gradient(145deg, #334155 0%, #1e293b 100%);
+      border-radius: 8px;
+      box-shadow:
+        0 8px 0 #0f172a,
+        0 16px 32px rgba(15, 23, 42, 0.35),
+        inset 0 1px 0 rgba(255,255,255,.12);
+    }
+    .monitor-stand {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: 32%;
+      height: 11%;
+      background: linear-gradient(180deg, #475569 0%, #334155 100%);
+      border-radius: 3px;
+      box-shadow: 0 4px 0 #1e293b;
+    }
+    .monitor-screen {
+      position: absolute;
+      left: 5%;
+      right: 5%;
+      top: 8%;
+      bottom: 12%;
+      background: linear-gradient(155deg, #1e3a5f 0%, #0c1929 100%);
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: inset 0 0 24px rgba(0,0,0,.4);
+    }
+    .monitor-screen::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,.025) 2px,
+        rgba(255,255,255,.025) 4px
+      );
+      pointer-events: none;
+      z-index: 2;
+    }
+    .monitor-ui {
+      position: absolute;
+      inset: 5%;
+      border-radius: 3px;
+      overflow: visible;
+      background: linear-gradient(180deg, #1d4ed8 0%, #dbeafe 14%, #f8fafc 14%, #f1f5f9 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .monitor-ui__bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3.5% 4% 3%;
+      background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+      overflow: visible;
+    }
+    .monitor-ui__hint {
+      font-size: clamp(2px, 0.48vmin, 5px);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #fef08a;
+      text-transform: uppercase;
+    }
+    .monitor-ui__loupe {
+      position: relative;
+      overflow: visible;
+      width: 13%;
+      min-width: 8px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.95) 0%, rgba(224, 242, 254, 0.5) 28%, transparent 42%),
+        radial-gradient(circle at 50% 50%, #bae6fd 0%, #38bdf8 55%, #0369a1 100%);
+      box-shadow:
+        inset 0 -2px 4px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(14, 165, 233, 0.5),
+        0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .monitor-ui__loupe::after {
+      content: "";
+      position: absolute;
+      width: 32%;
+      height: 10%;
+      right: -8%;
+      bottom: 4%;
+      background: linear-gradient(90deg, #64748b, #94a3b8);
+      border-radius: 2px;
+      transform: rotate(42deg);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    .monitor-ui__app {
+      padding: 4% 4% 3%;
+    }
+    .monitor-ui__title {
+      font-size: clamp(2px, 0.45vmin, 5px);
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 3%;
+      letter-spacing: -0.02em;
+    }
+    .monitor-ui__row {
+      height: 5%;
+      min-height: 2px;
+      background: linear-gradient(90deg, #e2e8f0 0%, #f8fafc 40%, #e2e8f0 100%);
+      border-radius: 1px;
+      margin-bottom: 2.5%;
+    }
+    .monitor-ui__row--accent {
+      background: linear-gradient(90deg, #bae6fd 0%, #e0f2fe 50%, #bae6fd 100%);
+    }
+    .sticker-draw {
+      position: absolute;
+      left: 5%;
+      bottom: 3%;
+      width: 26%;
+      height: 22%;
+      background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%);
+      border-radius: 3px;
+      transform: rotate(-10deg);
+      box-shadow: 2px 4px 0 rgba(202, 138, 4, 0.35), 0 2px 8px rgba(0,0,0,.1);
+      border: 1px solid #facc15;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .sticker-draw::before,
+    .sticker-draw::after {
+      content: "";
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      height: 10%;
+      background: rgba(120, 53, 15, 0.28);
+      border-radius: 1px;
+    }
+    .sticker-draw::before { top: 22%; }
+    .sticker-draw::after { top: 48%; height: 8%; }
+    .sticker-memo-graphic {
+      position: absolute;
+      border-radius: 3px;
+      z-index: 5;
+      pointer-events: none;
+      box-shadow: 2px 4px 0 rgba(15, 23, 42, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+      transform: rotate(-4deg);
+    }
+    .sticker-memo-graphic::before,
+    .sticker-memo-graphic::after {
+      content: "";
+      position: absolute;
+      left: 14%;
+      right: 14%;
+      height: 8%;
+      background: rgba(30, 41, 59, 0.12);
+      border-radius: 1px;
+    }
+    .sticker-memo-graphic::before { top: 28%; }
+    .sticker-memo-graphic::after { top: 52%; height: 6%; }
+    .sticker-memo-graphic--mint {
+      left: 34%;
+      bottom: 5%;
+      top: auto;
+      width: 15%;
+      height: 12%;
+      background: linear-gradient(145deg, #ccfbf1 0%, #5eead4 45%, #2dd4bf 100%);
+      border: 1px solid rgba(15, 118, 110, 0.35);
+      transform: rotate(5deg);
+    }
+    .sticker-memo-graphic--rose {
+      left: 51%;
+      bottom: 6%;
+      top: auto;
+      width: 14%;
+      height: 11%;
+      background: linear-gradient(145deg, #fce7f3 0%, #f9a8d4 50%, #ec4899 100%);
+      border: 1px solid rgba(190, 24, 93, 0.35);
+      transform: rotate(-7deg);
+    }
+    .hotspot.sticker-memo-a {
+      left: 33%;
+      bottom: 4%;
+      top: auto;
+      width: 17%;
+      height: 14%;
+      border-radius: 4px;
+    }
+    .hotspot.sticker-memo-b {
+      left: 50%;
+      bottom: 5%;
+      top: auto;
+      width: 16%;
+      height: 13%;
+      border-radius: 4px;
+    }
+    .wall-calendar-graphic {
+      position: absolute;
+      right: 8%;
+      top: 6%;
+      width: 20%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .wall-calendar-sheet {
+      background: linear-gradient(180deg, #fafaf9 0%, #f4f4f3 100%);
+      border-radius: 4px;
+      box-shadow:
+        0 2px 0 #d6d3d1,
+        0 6px 14px rgba(15, 23, 42, 0.12),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+      padding: 5% 5% 6%;
+    }
+    .wall-calendar-month {
+      text-align: center;
+      font-size: clamp(4px, 1.1vmin, 9px);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #44403c;
+      margin-bottom: 4%;
+      line-height: 1.2;
+    }
+    .wall-calendar-month .cal-month-line {
+      display: block;
+    }
+    .wall-calendar-month .cal-month-line.is-active {
+      color: #0f766e;
+      text-shadow: 0 0 6px rgba(20, 184, 166, 0.45);
+    }
+    .wall-calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px 0;
+      margin-bottom: 2%;
+      font-size: clamp(3px, 0.75vmin, 6px);
+      font-weight: 700;
+      color: #78716c;
+      text-align: center;
+    }
+    .wall-calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px 1px;
+    }
+    .wall-calendar-cell {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(3px, 0.85vmin, 7px);
+      font-weight: 700;
+      color: #292524;
+      border-radius: 2px;
+      line-height: 1;
+    }
+    .wall-calendar-cell.is-muted {
+      visibility: hidden;
+    }
+    .wall-calendar-cell.is-today {
+      background: linear-gradient(180deg, #5eead4 0%, #14b8a6 100%);
+      color: #fff;
+      box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.35);
+    }
+    .phone-graphic {
+      position: absolute;
+      right: 9.5%;
+      bottom: 8%;
+      width: 12%;
+      height: 26%;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .phone-body {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
+      border-radius: 16px;
+      box-shadow:
+        inset 0 0 0 2px #334155,
+        0 10px 28px rgba(0,0,0,.35);
+    }
+    .phone-body::before {
+      content: "";
+      position: absolute;
+      top: 4%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36%;
+      height: 8%;
+      background: #020617;
+      border-radius: 0 0 12px 12px;
+    }
+    .phone-display {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 14%;
+      bottom: 9%;
+      background:
+        linear-gradient(180deg, rgba(248, 250, 252, 0.22) 0%, rgba(248, 250, 252, 0.08) 10%, transparent 14%),
+        linear-gradient(180deg, #312e81 0%, #1e1b4b 100%);
+      border-radius: 8px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .phone-display::before {
+      content: "";
+      position: absolute;
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 26%;
+      height: 5px;
+      border-radius: 6px;
+      background: linear-gradient(180deg, rgba(148, 163, 184, 0.85) 0%, rgba(71, 85, 105, 0.65) 100%);
+      box-shadow:
+        0 6px 14px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+    .phone-display::after {
+      content: "";
+      position: absolute;
+      top: 14%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid rgba(226, 232, 240, 0.55);
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.25));
+    }
+    .phone-home-indicator {
+      position: absolute;
+      bottom: 6%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 32%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      z-index: 2;
+    }
+    .diary-graphic {
+      position: absolute;
+      left: 10%;
+      bottom: 11%;
+      width: 22%;
+      height: 17%;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .diary-spine {
+      position: absolute;
+      left: 48%;
+      top: 0;
+      bottom: 0;
+      width: 6%;
+      background: linear-gradient(90deg, #44403c 0%, #78716c 50%, #44403c 100%);
+      transform: translateX(-50%);
+      border-radius: 1px;
+      z-index: 2;
+      box-shadow: 0 0 4px rgba(0,0,0,.25);
+    }
+    .diary-page-left,
+    .diary-page-right {
+      position: absolute;
+      top: 4%;
+      bottom: 4%;
+      width: 46%;
+      border-radius: 2px;
+      box-shadow: 1px 2px 6px rgba(0,0,0,.12);
+    }
+    .diary-page-left {
+      left: 2%;
+      background: linear-gradient(180deg, #fffefb 0%, #f5f0e6 100%);
+    }
+    .diary-page-right {
+      right: 2%;
+      background: linear-gradient(180deg, #fffef8 0%, #faf6e8 100%);
+    }
+    .diary-page-left::before,
+    .diary-page-right::before {
+      content: "";
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      top: 18%;
+      bottom: 12%;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 5px,
+        rgba(120, 113, 108, 0.18) 5px,
+        rgba(120, 113, 108, 0.18) 6px
+      );
+    }
+    .paper-graphic {
+      position: absolute;
+      left: 36%;
+      bottom: 9%;
+      width: 26%;
+      height: 14%;
+      z-index: 5;
+      pointer-events: none;
+      transform: rotate(3deg);
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 2px 6px 14px rgba(15, 23, 42, 0.12), 0 0 0 1px #e2e8f0;
+    }
+    .paper-graphic::before {
+      content: "";
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 12%;
+      height: 4px;
+      background: #cbd5e1;
+      border-radius: 1px;
+    }
+    .paper-graphic::after {
+      content: "";
+      position: absolute;
+      left: 8%;
+      right: 14%;
+      top: 28%;
+      bottom: 14%;
+      background: repeating-linear-gradient(
+        transparent,
+        transparent 5px,
+        #e2e8f0 5px,
+        #e2e8f0 6px
+      );
+    }
+    .screen-glow {
+      position: absolute;
+      inset: 8%;
+      border: 1px solid rgba(125, 211, 252, 0.45);
+      border-radius: 3px;
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.2);
+      pointer-events: none;
+    }
+    .hotspot {
+      position: absolute;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 8px;
+      -webkit-tap-highlight-color: rgba(20, 184, 166, 0.15);
+      transition: box-shadow 0.18s, transform 0.18s;
+      z-index: 6;
+    }
+    @media (hover: hover) {
+      .hotspot:hover {
+        box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.75), 0 0 20px rgba(45, 212, 191, 0.25);
+      }
+    }
+    .hotspot:focus-visible {
+      outline: 3px solid #14b8a6;
+      outline-offset: 2px;
+    }
+    .hotspot.monitor-screen {
+      left: 5%;
+      right: 5%;
+      top: 8%;
+      bottom: 26%;
+      border-radius: 4px;
+    }
+    .hotspot.monitor-sticker {
+      left: 2%;
+      bottom: 1%;
+      width: 32%;
+      height: 28%;
+      border-radius: 3px;
+    }
+    .hotspot.phone {
+      right: 9.5%;
+      bottom: 8%;
+      width: 12%;
+      height: 26%;
+      border-radius: 14px;
+    }
+    .hotspot.diary {
+      left: 10%;
+      bottom: 11%;
+      width: 22%;
+      height: 17%;
+      border-radius: 4px;
+    }
+    .hotspot.paper {
+      left: 36%;
+      bottom: 9%;
+      width: 26%;
+      height: 14%;
+      border-radius: 2px;
+    }
+    .hotspot.notebook {
+      right: 23%;
+      bottom: 12%;
+      width: 14%;
+      height: 16%;
+      border-radius: 4px;
+    }
+    .hotspot.plant {
+      right: 2.5%;
+      bottom: 37%;
+      width: 11%;
+      height: 30%;
+      border-radius: 10px;
+    }
+    .hotspot.water-can {
+      right: 13.5%;
+      bottom: 39%;
+      width: 8%;
+      height: 20%;
+      border-radius: 10px;
+    }
+    .hotspot.frame {
+      left: 5%;
+      bottom: 32%;
+      width: 11%;
+      height: 20%;
+      border-radius: 6px;
+      transform: rotate(-6deg);
+    }
+    .monitor-frame .hotspot {
+      position: absolute;
+    }
+    .hotspot.viewed::after {
+      content: "";
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #fff
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230f766e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E")
+        center / 13px 13px no-repeat;
+      border: 2px solid #0d9488;
+      box-shadow: 0 2px 8px rgba(15, 118, 110, 0.3);
+      pointer-events: none;
+      z-index: 8;
+    }
+    .hotspot.viewed.monitor-sticker::after {
+      top: 5px;
+      left: 5px;
+      right: auto;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+      overscroll-behavior: contain;
+    }
+    @media (min-width: 540px) {
+      .modal { align-items: center; }
+    }
+    .modal-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      width: 100%;
+      max-width: 420px;
+      max-height: min(90vh, 680px);
+      overflow: auto;
+      border-radius: 20px;
+      padding: 20px 20px 22px;
+      box-shadow: var(--shadow-lift), 0 0 0 1px rgba(255,255,255,.9) inset;
+      position: relative;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    .modal-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 20px;
+      right: 20px;
+      height: 3px;
+      border-radius: 0 0 6px 6px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-light));
+    }
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: #f1f5f9;
+      border-radius: 50%;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      color: #64748b;
+      transition: background 0.15s, color 0.15s;
+    }
+    .modal-close:hover { background: #e2e8f0; color: #0f172a; }
+    .modal-card h2 {
+      margin: 8px 44px 8px 0;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+    .caption {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+      margin: 0 0 12px;
+    }
+    .modal-visual {
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    }
+    .outlook-shell {
+      display: flex;
+      min-height: 200px;
+      background: #f1f5f9;
+    }
+    .outlook-rail {
+      width: 26%;
+      min-width: 56px;
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      padding: 10px 6px;
+      font-size: 8px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+    .outlook-rail div { margin-bottom: 6px; opacity: 0.85; }
+    .outlook-main {
+      flex: 1;
+      position: relative;
+      padding: 8px;
+    }
+    .outlook-mini {
+      font-size: 7px;
+      color: #64748b;
+      min-height: 120px;
+      position: relative;
+      background: #fff;
+      border-radius: 0 0 8px 8px;
+    }
+    .outlook-mini .ol-title {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 9px;
+      margin-bottom: 4px;
+    }
+    .outlook-mini.magnified {
+      font-size: 13px;
+      color: #1e293b;
+      padding: 12px;
+      min-height: 240px;
+      background: linear-gradient(180deg, #eff6ff 0%, #fff 100%);
+    }
+    .outlook-mini.magnified .ol-title { font-size: 14px; }
+    .loupe-btn {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(145deg, #fef08a 0%, #facc15 100%);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 14px rgba(234, 179, 8, 0.45);
+    }
+    .loupe-btn:hover { filter: brightness(1.05); }
+    .photo-cats-stage {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(185deg, #ecfeff 0%, #a5f3fc 45%, #7dd3fc 100%);
+      min-height: 200px;
+      padding: 22px 18px 36px;
+      border: 1px solid #bae6fd;
+    }
+    .photo-cats-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 18px;
+    }
+    .photo-cat-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .photo-cat-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+    }
+    .photo-cat-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #0c4a6e;
+      text-align: center;
+      margin-top: 4px;
+      line-height: 1.25;
+    }
+    .photo-audit-nag {
+      margin-top: 16px;
+      padding: 14px 16px;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      font-weight: 600;
+      color: #0c4a6e;
+      text-align: center;
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+      border: 2px solid #f59e0b;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.2);
+    }
+    .photo-audit-nag.is-standalone {
+      margin-top: 0;
+    }
+    .water-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .ginger-cat {
+      position: relative;
+      width: 76px;
+      height: 100px;
+      flex-shrink: 0;
+    }
+    .ginger-cat__body {
+      position: absolute;
+      bottom: 0;
+      left: 10px;
+      width: 56px;
+      height: 48px;
+      background: linear-gradient(165deg, #fdba74 0%, #fb923c 40%, #ea580c 85%, #9a3412 100%);
+      border-radius: 50% 50% 46% 46%;
+      box-shadow: inset -3px -4px 8px rgba(0,0,0,.12);
+    }
+    .ginger-cat__body::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      top: 12px;
+      right: 10px;
+      height: 3px;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(154, 52, 18, 0.45) 0px,
+        rgba(154, 52, 18, 0.45) 5px,
+        transparent 5px,
+        transparent 9px
+      );
+      border-radius: 2px;
+    }
+    .ginger-cat__head {
+      position: absolute;
+      top: 4px;
+      left: 6px;
+      width: 64px;
+      height: 52px;
+      background: linear-gradient(180deg, #fed7aa 0%, #fb923c 45%, #f97316 100%);
+      border-radius: 50%;
+      box-shadow: inset 0 -2px 4px rgba(234, 88, 12, 0.25);
+    }
+    .ginger-cat__ear {
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-bottom: 18px solid #ea580c;
+      top: -2px;
+    }
+    .ginger-cat__ear--l { left: 8px; transform: rotate(-18deg); }
+    .ginger-cat__ear--r { right: 8px; transform: rotate(18deg); }
+    .ginger-cat__eye {
+      position: absolute;
+      top: 22px;
+      width: 9px;
+      height: 11px;
+      background: #1c1917;
+      border-radius: 50%;
+    }
+    .ginger-cat__eye--l { left: 16px; }
+    .ginger-cat__eye--r { right: 16px; }
+    .ginger-cat__nose {
+      position: absolute;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 6px;
+      background: #fda4af;
+      border-radius: 40% 40% 50% 50%;
+    }
+    .ginger-cat__tail {
+      position: absolute;
+      bottom: 4px;
+      right: 0;
+      width: 18px;
+      height: 50px;
+      border: none;
+      border-right: 9px solid #ea580c;
+      border-bottom: 3px solid transparent;
+      border-radius: 0 55% 20% 0;
+      transform: rotate(8deg);
+      opacity: 0.98;
+    }
+    .ginger-cat--mirror {
+      transform: scaleX(-1);
+    }
+    .ginger-cat--cream .ginger-cat__head {
+      background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 40%, #fde68a 100%);
+      box-shadow: inset 0 -2px 4px rgba(251, 191, 36, 0.35);
+    }
+    .ginger-cat--cream .ginger-cat__body {
+      background: linear-gradient(165deg, #fffbeb 0%, #fef3c7 30%, #fde68a 70%, #fbbf24 95%, #d97706 100%);
+      box-shadow: inset -3px -4px 8px rgba(217, 119, 6, 0.15);
+    }
+    .ginger-cat--cream .ginger-cat__body::before {
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(180, 83, 9, 0.22) 0px,
+        rgba(180, 83, 9, 0.22) 5px,
+        transparent 5px,
+        transparent 9px
+      );
+    }
+    .ginger-cat--cream .ginger-cat__ear {
+      border-bottom-color: #fbbf24;
+    }
+    .ginger-cat--cream .ginger-cat__tail {
+      border-right-color: #fcd34d;
+    }
+    .ginger-cat--fluffy .ginger-cat__head {
+      width: 68px;
+      height: 56px;
+      left: 4px;
+      border-radius: 50% 50% 46% 46%;
+    }
+    .ginger-cat--fluffy .ginger-cat__body {
+      width: 60px;
+      height: 52px;
+      left: 8px;
+      border-radius: 50% 50% 44% 44%;
+      box-shadow:
+        inset 3px 3px 0 rgba(255, 255, 255, 0.35),
+        inset -3px -4px 8px rgba(0, 0, 0, 0.08);
+    }
+    .ginger-cat--fluffy .ginger-cat__ear--l {
+      left: 6px;
+      border-left-width: 10px;
+      border-right-width: 10px;
+      border-bottom-width: 20px;
+    }
+    .ginger-cat--fluffy .ginger-cat__ear--r {
+      right: 6px;
+      border-left-width: 10px;
+      border-right-width: 10px;
+      border-bottom-width: 20px;
+    }
+    .ginger-cat--cream.ginger-cat--fluffy .ginger-cat__head {
+      width: 72px;
+      height: 60px;
+      left: 2px;
+      border-radius: 52% 52% 48% 48%;
+      box-shadow:
+        inset 0 -3px 5px rgba(251, 191, 36, 0.28),
+        inset 4px 4px 0 rgba(255, 255, 255, 0.45);
+    }
+    .ginger-cat--cream.ginger-cat--fluffy .ginger-cat__body {
+      width: 64px;
+      height: 56px;
+      left: 6px;
+      border-radius: 52% 52% 42% 42%;
+      box-shadow:
+        inset 4px 5px 0 rgba(255, 255, 255, 0.4),
+        inset -4px -5px 10px rgba(217, 119, 6, 0.12);
+    }
+    .ginger-cat--cream.ginger-cat--fluffy .ginger-cat__tail {
+      width: 22px;
+      height: 54px;
+      border-right-width: 11px;
+    }
+    .ginger-cat--ginger-rich .ginger-cat__head {
+      background: linear-gradient(180deg, #fdba74 0%, #ea580c 42%, #c2410c 100%);
+      box-shadow: inset 0 -2px 5px rgba(154, 52, 18, 0.35);
+    }
+    .ginger-cat--ginger-rich .ginger-cat__body {
+      background: linear-gradient(165deg, #fb923c 0%, #ea580c 35%, #9a3412 92%, #7c2d12 100%);
+    }
+    .ginger-cat--ginger-rich .ginger-cat__ear {
+      border-bottom-color: #9a3412;
+    }
+    .ginger-cat--ginger-rich .ginger-cat__tail {
+      border-right-color: #c2410c;
+    }
+    .sticker-zoom {
+      background: linear-gradient(145deg, #fefce8 0%, #fef9c3 100%);
+      padding: 28px 20px;
+      text-align: center;
+      font-size: 1.08rem;
+      font-weight: 700;
+      color: #713f12;
+      border: 2px dashed #eab308;
+      font-family: inherit;
+    }
+    .memo-sticker-stage {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      min-height: 200px;
+      padding: 22px 18px 40px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+    .memo-sticker-stage.memo-sticker-stage--mint {
+      background: linear-gradient(185deg, #ecfdf5 0%, #99f6e4 40%, #5eead4 100%);
+    }
+    .memo-sticker-stage.memo-sticker-stage--rose {
+      background: linear-gradient(185deg, #fdf2f8 0%, #fbcfe8 45%, #f472b6 100%);
+    }
+    .memo-sticker-preview {
+      margin: 0 auto;
+      max-width: 200px;
+      min-height: 120px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.35);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+      filter: blur(3.5px);
+      opacity: 0.88;
+      font-size: 11px;
+      line-height: 1.6;
+      padding: 16px;
+      color: transparent;
+    }
+    .memo-sticker-zoomed {
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.45;
+      color: #0f172a;
+      padding: 20px 12px 8px;
+    }
+    .modal-actions.hidden {
+      display: none !important;
+    }
+    .phone-ui {
+      background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+      color: #e2e8f0;
+      padding: 16px;
+      min-height: 300px;
+      position: relative;
+    }
+    .phone-status {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .phone-notch {
+      width: 38%;
+      height: 20px;
+      background: #020617;
+      margin: 0 auto 12px;
+      border-radius: 0 0 14px 14px;
+    }
+    .shade-toggle {
+      width: 100%;
+      padding: 12px;
+      margin-top: 4px;
+      background: rgba(51, 65, 85, 0.9);
+      color: #f8fafc;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+    }
+    .shade-toggle:hover { background: rgba(71, 85, 105, 0.95); }
+    .notifications {
+      margin-top: 12px;
+      border-radius: 14px;
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s ease, opacity 0.3s;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .notifications.open {
+      max-height: 220px;
+      opacity: 1;
+    }
+    .notif {
+      background: rgba(30, 41, 59, 0.92);
+      backdrop-filter: blur(8px);
+      padding: 14px;
+      border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .notif strong { color: #fdba74; display: block; margin-bottom: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .diary-page {
+      background: linear-gradient(180deg, #fffef9 0%, #faf6f0 100%);
+      padding: 20px;
+      min-height: 220px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #422006;
+    }
+    .diary-page .line { margin-bottom: 10px; }
+    .paper-doc {
+      background: #fff;
+      padding: 18px;
+      font-size: 12px;
+      color: #334155;
+      min-height: 200px;
+    }
+    .paper-doc strong {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+    .paper-doc table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .paper-doc th, .paper-doc td {
+      border: 1px solid #e2e8f0;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .paper-doc th { background: #f8fafc; font-weight: 600; font-size: 11px; color: #475569; }
+    .paper-doc tr:nth-child(even) td { background: #fafafa; }
+    .notebook-modal {
+      background: linear-gradient(180deg, #eff6ff 0%, #fff 100%);
+      padding: 22px;
+      min-height: 220px;
+      border-left: 4px solid #3b82f6;
+    }
+    .notebook-modal h3 {
+      margin: 0 0 14px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      font-weight: 700;
+    }
+    .notebook-modal ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .modal-hint {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: #9a3412;
+      background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
+      border-radius: 12px;
+      border: 1px solid #fdba74;
+    }
+    .modal-hint.hidden { display: none; }
+    .btn.danger {
+      background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+      width: 100%;
+      margin-top: 0;
+      box-shadow: 0 2px 10px rgba(220, 38, 38, 0.35);
+    }
+    .btn.danger:hover { filter: brightness(1.05); }
+    .btn.danger.done {
+      background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+      box-shadow: 0 2px 10px rgba(22, 163, 74, 0.3);
+      pointer-events: none;
+    }
+    .btn.ok-choice {
+      background: linear-gradient(180deg, #64748b 0%, #475569 100%);
+      width: 100%;
+      margin-top: 0;
+      box-shadow: 0 2px 8px rgba(71, 85, 105, 0.25);
+    }
+    .btn.ok-choice:hover { filter: brightness(1.05); }
+    .btn.ok-choice.done {
+      background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+      pointer-events: none;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35);
+    }
+    @media (max-width: 600px), (pointer: coarse) {
+      .hotspot { min-width: 44px; min-height: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="panel" id="introPanel">
+    <h1>Аудит рабочего места</h1>
+    <p>Вы — сотрудник службы информационной безопасности. Вам поручили проверить рабочее место <strong>Ивана Ивановича</strong>: вы подходите к столу, садитесь и осматриваете всё, что видно без лишнего вмешательства в чужое оборудование.</p>
+    <p>На столе полно обычных вещей и несколько подозрительных деталей. Открывайте объекты, при необходимости приближайте экран лупой и решайте: <strong>нарушение ИБ</strong> или <strong>не является нарушением</strong>. Нужно зафиксировать <strong>все пять нарушений</strong>.</p>
+    <div class="btn-wrap">
+      <button type="button" class="btn" id="startBtn">Начать аудит</button>
+    </div>
+  </div>
+
+  <div id="gameBlock" class="hidden" style="width:100%;max-width:640px;">
+    <div class="progress" id="progressLine">
+      <div class="progress-main">Нарушений зафиксировано: <span id="violationCount">0</span> / 5</div>
+    </div>
+    <div class="scene-wrap">
+      <div class="scene" role="img" aria-label="Офис: стол с монитором, клавиатурой и личными вещами">
+        <div class="desk" aria-hidden="true"></div>
+        <div class="desk-shine" aria-hidden="true"></div>
+        <div class="wall-calendar-graphic" id="wallCalendarRoot" aria-hidden="true">
+          <div class="wall-calendar-sheet">
+            <div class="wall-calendar-month" id="wallCalendarMonth"></div>
+            <div class="wall-calendar-weekdays" aria-hidden="true">
+              <span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span>
+            </div>
+            <div class="wall-calendar-grid" id="wallCalendarGrid"></div>
+          </div>
+        </div>
+        <div class="frame-graphic" aria-hidden="true">
+          <div class="frame-border">
+            <div class="frame-photo">
+              <div class="frame-mini-duo" aria-hidden="true">
+                <div class="mini-cat mini-cat--cream mini-cat--fluffy">
+                  <span class="mini-cat__ear mini-cat__ear--l"></span>
+                  <span class="mini-cat__ear mini-cat__ear--r"></span>
+                  <span class="mini-cat__head"></span>
+                  <span class="mini-cat__body"></span>
+                  <span class="mini-cat__tail"></span>
+                </div>
+                <div class="mini-cat mini-cat--ginger-rich mini-cat--face-left">
+                  <span class="mini-cat__ear mini-cat__ear--l"></span>
+                  <span class="mini-cat__ear mini-cat__ear--r"></span>
+                  <span class="mini-cat__head"></span>
+                  <span class="mini-cat__body"></span>
+                  <span class="mini-cat__tail"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="water-can-graphic" id="waterCanGraphic" aria-hidden="true">
+          <div class="water-can-handle"></div>
+          <div class="water-can-body"></div>
+          <div class="water-can-neck"></div>
+          <div class="water-can-spout"></div>
+          <div class="water-can-top"></div>
+          <span class="water-stream" aria-hidden="true"></span>
+        </div>
+        <div class="plant-graphic" id="plantGraphic" aria-hidden="true">
+          <div class="fl-plant">
+            <div class="fl-stem"></div>
+            <div class="fl-parts">
+              <span class="fl-leaf fl-leaf--1 fl-prt"></span>
+              <span class="fl-leaf fl-leaf--2 fl-prt"></span>
+              <span class="fl-leaf fl-leaf--3 fl-prt"></span>
+              <span class="fl-leaf fl-leaf--4 fl-prt"></span>
+            </div>
+            <div class="fl-bloom">
+              <span class="fl-petal fl-petal--1"></span>
+              <span class="fl-petal fl-petal--2"></span>
+              <span class="fl-petal fl-petal--3"></span>
+              <span class="fl-petal fl-petal--4"></span>
+              <span class="fl-petal fl-petal--5"></span>
+              <span class="fl-petal fl-petal--6"></span>
+              <div class="fl-heart"></div>
+            </div>
+          </div>
+          <div class="fl-soil"></div>
+          <div class="fl-pot"></div>
+        </div>
+        <div class="kbd-graphic" aria-hidden="true">
+          <div class="kbd-base">
+            <div class="kbd-keys"></div>
+          </div>
+        </div>
+        <div class="mouse-graphic" aria-hidden="true">
+          <div class="mouse-body"></div>
+        </div>
+        <div class="monitor-unit">
+          <div class="monitor-frame" aria-hidden="true">
+            <div class="monitor-screen" aria-hidden="true">
+              <div class="monitor-ui" aria-hidden="true">
+                <div class="monitor-ui__bar">
+                  <span class="monitor-ui__hint">Сессия открыта</span>
+                  <span class="monitor-ui__loupe" aria-hidden="true"></span>
+                </div>
+                <div class="monitor-ui__app">
+                  <div class="monitor-ui__title">Входящие — Outlook</div>
+                  <div class="monitor-ui__row monitor-ui__row--accent"></div>
+                  <div class="monitor-ui__row"></div>
+                  <div class="monitor-ui__row"></div>
+                  <div class="monitor-ui__row"></div>
+                </div>
+              </div>
+              <div class="screen-glow" aria-hidden="true"></div>
+            </div>
+            <div class="sticker-draw" aria-hidden="true"></div>
+            <div class="sticker-memo-graphic sticker-memo-graphic--mint" aria-hidden="true"></div>
+            <div class="sticker-memo-graphic sticker-memo-graphic--rose" aria-hidden="true"></div>
+            <button type="button" class="hotspot monitor-screen" id="hsScreen" aria-label="Экран монитора"></button>
+            <button type="button" class="hotspot monitor-sticker" id="hsSticker" aria-label="Стикер на мониторе"></button>
+            <button type="button" class="hotspot sticker-memo-a" id="hsStickerMemoA" aria-label="Стикер-напоминание (мятный)"></button>
+            <button type="button" class="hotspot sticker-memo-b" id="hsStickerMemoB" aria-label="Стикер-напоминание (розовый)"></button>
+          </div>
+          <div class="monitor-stand" aria-hidden="true"></div>
+        </div>
+        <div class="phone-graphic" aria-hidden="true">
+          <div class="phone-body">
+            <div class="phone-display">
+              <div class="phone-home-indicator" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+        <div class="diary-graphic" aria-hidden="true">
+          <div class="diary-page-left"></div>
+          <div class="diary-page-right"></div>
+          <div class="diary-spine"></div>
+        </div>
+        <div class="notebook-graphic" aria-hidden="true">
+          <div class="notebook-cover">
+            <div class="notebook-spine"></div>
+            <div class="notebook-lines"></div>
+          </div>
+        </div>
+        <div class="paper-graphic" aria-hidden="true"></div>
+        <div class="scene-desk-label scene-desk-label--paper" aria-hidden="true">Данные клиентов</div>
+        <div class="scene-desk-label scene-desk-label--notebook" aria-hidden="true">Рабочий блокнот</div>
+        <div class="scene-desk-label scene-desk-label--diary" aria-hidden="true">Личный блокнот</div>
+        <button type="button" class="hotspot phone" id="hsPhone" aria-label="Телефон"></button>
+        <button type="button" class="hotspot diary" id="hsDiary" aria-label="Ежедневник"></button>
+        <button type="button" class="hotspot notebook" id="hsNotebook" aria-label="Блокнот"></button>
+        <button type="button" class="hotspot paper" id="hsPaper" aria-label="Бумага на столе"></button>
+        <button type="button" class="hotspot plant" id="hsPlant" aria-label="Цветок в горшке"></button>
+        <button type="button" class="hotspot water-can" id="hsWaterCan" aria-label="Лейка"></button>
+        <button type="button" class="hotspot frame" id="hsFrame" aria-label="Фотография: кот Дуся и кот Жижа"></button>
+      </div>
+    </div>
+    <div class="panel hidden" id="finalePanel">
+      <p id="finaleText"></p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="modalClose" aria-label="Закрыть">×</button>
+      <h2 id="modalTitle"></h2>
+      <p class="caption" id="modalCaption"></p>
+      <div id="modalBody"></div>
+      <p class="modal-hint hidden" id="modalHint" role="status"></p>
+      <div class="modal-actions" id="modalActionsBar">
+        <button type="button" class="btn danger" id="markBtn">Зафиксировать нарушение ИБ</button>
+        <button type="button" class="btn ok-choice" id="cleanBtn">Не является нарушением</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="photoModal" role="dialog" aria-modal="true" aria-labelledby="photoModalTitle">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="photoModalClose" aria-label="Закрыть">×</button>
+      <h2 id="photoModalTitle">Кот Дуся и кот Жижа</h2>
+      <p class="caption" id="photoModalCaption">Лупа — чтобы рассмотреть подробнее.</p>
+      <div id="photoModalBody"></div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="waterModal" role="dialog" aria-modal="true" aria-labelledby="waterModalTitle">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="waterModalClose" aria-label="Закрыть">×</button>
+      <h2 id="waterModalTitle">Лейка</h2>
+      <p class="caption hidden" id="waterModalCaption">Можно полить цветок.</p>
+      <p class="caption hidden" id="waterModalMessage"></p>
+      <div class="water-modal-actions" id="waterModalActions"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const VIOLATIONS = {
+        screen: {
+          title: "Экран монитора",
+          caption: "Сессия не заблокирована. На экране открыта почта — детали видны после приближения.",
+          markLabel: "Нарушение зафиксировано",
+        },
+        sticker: {
+          title: "Стикер на мониторе",
+          caption: "Жёлтая наклейка у левого нижнего угла рамки.",
+          markLabel: "Нарушение зафиксировано",
+        },
+        phone: {
+          title: "Телефон",
+          caption: "Смартфон с включённым экраном. Опустите шторку уведомлений.",
+          markLabel: "Нарушение зафиксировано",
+        },
+        diary: {
+          title: "Ежедневник",
+          caption: "Открытая книга на сегодняшней странице.",
+          markLabel: "Нарушение зафиксировано",
+        },
+        paper: {
+          title: "Лист на столе",
+          caption: "Документ с табличными данными.",
+          markLabel: "Нарушение зафиксировано",
+        },
+      };
+
+      const HINT_FALSE_CLEAN_ON_VIOLATION =
+        "В этом учебном сценарии это нарушение ИБ. При необходимости нажмите «Зафиксировать нарушение ИБ».";
+
+      const NOTEBOOK = {
+        notebook: {
+          title: "Блокнот",
+          caption: "Спиральный блокнот с короткими личными и рабочими пометками.",
+          cleanLabel: "Корректно: не нарушение",
+          wrongViolationHint:
+            "Обычные бытовые и организационные записи без секретов в этом сценарии не классифицируются как нарушение. Выберите «Не является нарушением».",
+        },
+      };
+
+      const VIOLATION_KEYS = Object.keys(VIOLATIONS);
+      const NOTEBOOK_KEYS = Object.keys(NOTEBOOK);
+
+      const introPanel = document.getElementById("introPanel");
+      const gameBlock = document.getElementById("gameBlock");
+      const startBtn = document.getElementById("startBtn");
+      const modal = document.getElementById("modal");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalCaption = document.getElementById("modalCaption");
+      const modalBody = document.getElementById("modalBody");
+      const modalClose = document.getElementById("modalClose");
+      const markBtn = document.getElementById("markBtn");
+      const cleanBtn = document.getElementById("cleanBtn");
+      const modalHint = document.getElementById("modalHint");
+      const modalActionsBar = document.getElementById("modalActionsBar");
+      const violationCount = document.getElementById("violationCount");
+      const finalePanel = document.getElementById("finalePanel");
+      const finaleText = document.getElementById("finaleText");
+
+      let currentKey = null;
+      let magnified = false;
+      let memoStickerZoomed = false;
+      let photoAuditNagShown = false;
+      const decisions = Object.create(null);
+
+      const photoModalEl = document.getElementById("photoModal");
+      const photoModalBody = document.getElementById("photoModalBody");
+      const plantGraphicEl = document.getElementById("plantGraphic");
+      const waterModalEl = document.getElementById("waterModal");
+      const waterModalTitle = document.getElementById("waterModalTitle");
+      const waterModalCaption = document.getElementById("waterModalCaption");
+      const waterModalMessage = document.getElementById("waterModalMessage");
+      const waterModalActions = document.getElementById("waterModalActions");
+
+      let hasWateredFromCanOnce = false;
+
+      function closeWaterModal() {
+        waterModalEl.classList.add("hidden");
+        waterModalCaption.classList.add("hidden");
+        waterModalMessage.classList.add("hidden");
+        waterModalTitle.textContent = "Лейка";
+        waterModalActions.innerHTML = "";
+      }
+
+      function showWaterAuditNag() {
+        waterModalMessage.textContent =
+          "Хватит поливать — пора проводить проверку информационной безопасности.";
+        waterModalMessage.className = "caption photo-audit-nag is-standalone";
+        waterModalMessage.classList.remove("hidden");
+        waterModalActions.innerHTML =
+          "<button type=\"button\" class=\"btn\" id=\"waterOkBtn\">Понятно</button>";
+        document.getElementById("waterOkBtn").addEventListener("click", closeWaterModal);
+      }
+
+      function runWaterCanPourAnim() {
+        var el = document.getElementById("waterCanGraphic");
+        if (!el) return;
+        el.classList.remove("is-pouring");
+        void el.offsetWidth;
+        el.classList.add("is-pouring");
+        window.setTimeout(function () {
+          el.classList.remove("is-pouring");
+        }, 820);
+      }
+
+      function onWaterCanClick() {
+        if (!hasWateredFromCanOnce) {
+          hasWateredFromCanOnce = true;
+          applyWaterToPlant();
+          runWaterCanPourAnim();
+          return;
+        }
+        waterModalTitle.textContent = "К проверке";
+        waterModalCaption.classList.add("hidden");
+        showWaterAuditNag();
+        waterModalEl.classList.remove("hidden");
+      }
+
+      function applyWaterToPlant() {
+        if (plantGraphicEl.classList.contains("dropped")) {
+          plantGraphicEl.classList.remove("dropped");
+          plantGraphicEl.classList.remove("growing-leaves");
+          plantGraphicEl.classList.remove("plant-pulse");
+          void plantGraphicEl.offsetWidth;
+          plantGraphicEl.classList.add("growing-leaves");
+          window.setTimeout(function () {
+            plantGraphicEl.classList.remove("growing-leaves");
+          }, 900);
+        } else {
+          plantGraphicEl.classList.remove("plant-pulse");
+          void plantGraphicEl.offsetWidth;
+          plantGraphicEl.classList.add("plant-pulse");
+          window.setTimeout(function () {
+            plantGraphicEl.classList.remove("plant-pulse");
+          }, 900);
+        }
+      }
+
+      function initWallCalendar() {
+        var monthEl = document.getElementById("wallCalendarMonth");
+        var gridEl = document.getElementById("wallCalendarGrid");
+        if (!monthEl || !gridEl) return;
+        var now = new Date();
+        var y = now.getFullYear();
+        var m = now.getMonth();
+        var dToday = now.getDate();
+        var names = [
+          "январь",
+          "февраль",
+          "март",
+          "апрель",
+          "май",
+          "июнь",
+          "июль",
+          "август",
+          "сентябрь",
+          "октябрь",
+          "ноябрь",
+          "декабрь",
+        ];
+        monthEl.innerHTML =
+          "<span class='cal-month-line is-active'>" +
+          names[m] +
+          " " +
+          y +
+          "</span>";
+        var first = new Date(y, m, 1);
+        var pad = (first.getDay() + 6) % 7;
+        var lastDay = new Date(y, m + 1, 0).getDate();
+        var cells = [];
+        var i;
+        for (i = 0; i < pad; i++) {
+          cells.push("<div class='wall-calendar-cell is-muted'></div>");
+        }
+        for (i = 1; i <= lastDay; i++) {
+          var cls = "wall-calendar-cell";
+          if (i === dToday) cls += " is-today";
+          cells.push("<div class='" + cls + "'>" + i + "</div>");
+        }
+        gridEl.innerHTML = cells.join("");
+      }
+
+      function catMarkup(mirror, cream, fluffy, rich) {
+        var cls = "ginger-cat";
+        if (mirror) cls += " ginger-cat--mirror";
+        if (cream) cls += " ginger-cat--cream";
+        if (fluffy) cls += " ginger-cat--fluffy";
+        if (rich) cls += " ginger-cat--ginger-rich";
+        return (
+          "<div class='" + cls + "'>" +
+          "<div class='ginger-cat__tail'></div>" +
+          "<div class='ginger-cat__body'></div>" +
+          "<div class='ginger-cat__head'></div>" +
+          "<div class='ginger-cat__ear ginger-cat__ear--l'></div>" +
+          "<div class='ginger-cat__ear ginger-cat__ear--r'></div>" +
+          "<div class='ginger-cat__eye ginger-cat__eye--l'></div>" +
+          "<div class='ginger-cat__eye ginger-cat__eye--r'></div>" +
+          "<div class='ginger-cat__nose'></div>" +
+          "</div>"
+        );
+      }
+
+      function renderPhotoModalContent() {
+        const wrap = document.createElement("div");
+        wrap.className = "modal-visual";
+        wrap.style.padding = "0";
+        wrap.style.border = "none";
+        wrap.style.boxShadow = "none";
+        wrap.style.background = "transparent";
+        const stage = document.createElement("div");
+        stage.className = "photo-cats-stage";
+        const row = document.createElement("div");
+        row.className = "photo-cats-row";
+        row.innerHTML =
+          "<div class='photo-cat-cell'>" +
+          catMarkup(false, true, true, false) +
+          "<div class='photo-cat-label'>Светлый — Дуся</div></div>" +
+          "<div class='photo-cat-cell'>" +
+          catMarkup(true, false, false, true) +
+          "<div class='photo-cat-label'>Рыжий — Жижа</div></div>";
+        stage.appendChild(row);
+        if (photoAuditNagShown) {
+          const nag = document.createElement("div");
+          nag.className = "photo-audit-nag";
+          nag.setAttribute("role", "alert");
+          nag.textContent =
+            "Хватит разглядывать Дусю и Жижу — проводи проверку информационной безопасности.";
+          stage.appendChild(nag);
+        } else {
+          const loupe = document.createElement("button");
+          loupe.type = "button";
+          loupe.className = "loupe-btn";
+          loupe.setAttribute("aria-label", "Приблизить");
+          loupe.textContent = "🔍";
+          loupe.addEventListener("click", function (ev) {
+            ev.stopPropagation();
+            photoAuditNagShown = true;
+            renderPhotoModalContent();
+          });
+          stage.appendChild(loupe);
+        }
+        wrap.appendChild(stage);
+        photoModalBody.innerHTML = "";
+        photoModalBody.appendChild(wrap);
+      }
+
+      function openPhotoModal() {
+        photoAuditNagShown = false;
+        renderPhotoModalContent();
+        photoModalEl.classList.remove("hidden");
+      }
+
+      function closePhotoModal() {
+        photoModalEl.classList.add("hidden");
+        photoAuditNagShown = false;
+        photoModalBody.innerHTML = "";
+      }
+
+      const HOTSPOT_ID_BY_KEY = {
+        screen: "hsScreen",
+        sticker: "hsSticker",
+        phone: "hsPhone",
+        diary: "hsDiary",
+        notebook: "hsNotebook",
+        paper: "hsPaper",
+      };
+
+      const HOTSPOT_ARIA_BASE = {
+        hsScreen: "Экран монитора",
+        hsSticker: "Стикер на мониторе",
+        hsPhone: "Телефон",
+        hsDiary: "Ежедневник",
+        hsNotebook: "Блокнот",
+        hsPaper: "Бумага на столе",
+      };
+
+      function syncHotspotViewedState() {
+        Object.keys(HOTSPOT_ID_BY_KEY).forEach(function (key) {
+          const id = HOTSPOT_ID_BY_KEY[key];
+          const el = document.getElementById(id);
+          if (!el) return;
+          const d = decisions[key];
+          const reviewed = d === "violation" || d === "clean";
+          el.classList.toggle("viewed", reviewed);
+          const base = HOTSPOT_ARIA_BASE[id] || el.getAttribute("aria-label") || "";
+          el.setAttribute("aria-label", reviewed ? base + ", просмотрено" : base);
+        });
+      }
+
+      function isViolationKey(key) {
+        return VIOLATION_KEYS.indexOf(key) !== -1;
+      }
+
+      function isNotebookKey(key) {
+        return NOTEBOOK_KEYS.indexOf(key) !== -1;
+      }
+
+      function countViolationsMarked() {
+        return VIOLATION_KEYS.filter(function (k) {
+          return decisions[k] === "violation";
+        }).length;
+      }
+
+      function auditComplete() {
+        const vok = VIOLATION_KEYS.every(function (k) {
+          return decisions[k] === "violation";
+        });
+        const nb = decisions.notebook === "clean";
+        return vok && nb;
+      }
+
+      function isMemoStickerKey(key) {
+        return key === "stickerMemoA" || key === "stickerMemoB";
+      }
+
+      function renderMemoStickerModal() {
+        const stageClass =
+          currentKey === "stickerMemoA"
+            ? "memo-sticker-stage memo-sticker-stage--mint"
+            : "memo-sticker-stage memo-sticker-stage--rose";
+        const zoomText =
+          currentKey === "stickerMemoA"
+            ? "Сдать отчёт на этой неделе"
+            : "Забрать ручки из канцелярии";
+        const wrap = document.createElement("div");
+        wrap.className = "modal-visual";
+        wrap.style.padding = "0";
+        const stage = document.createElement("div");
+        stage.className = stageClass;
+        if (!memoStickerZoomed) {
+          const prev = document.createElement("div");
+          prev.className = "memo-sticker-preview";
+          prev.textContent = zoomText;
+          stage.appendChild(prev);
+          const loupe = document.createElement("button");
+          loupe.type = "button";
+          loupe.className = "loupe-btn";
+          loupe.setAttribute("aria-label", "Приблизить");
+          loupe.textContent = "🔍";
+          loupe.addEventListener("click", function (ev) {
+            ev.stopPropagation();
+            memoStickerZoomed = true;
+            renderMemoStickerModal();
+          });
+          stage.appendChild(loupe);
+        } else {
+          const zoom = document.createElement("div");
+          zoom.className = "memo-sticker-zoomed";
+          zoom.textContent = zoomText;
+          stage.appendChild(zoom);
+        }
+        wrap.appendChild(stage);
+        modalBody.innerHTML = "";
+        modalBody.appendChild(wrap);
+      }
+
+      function syncModalButtons() {
+        const key = currentKey;
+        if (!key) return;
+        modalHint.classList.add("hidden");
+        const d = decisions[key];
+
+        if (isViolationKey(key)) {
+          const v = VIOLATIONS[key];
+          if (d === "clean") {
+            modalHint.textContent = HINT_FALSE_CLEAN_ON_VIOLATION;
+            modalHint.classList.remove("hidden");
+          }
+          if (d === "violation") {
+            markBtn.disabled = true;
+            markBtn.classList.add("done");
+            markBtn.textContent = v.markLabel;
+            cleanBtn.disabled = true;
+            cleanBtn.classList.add("done");
+            cleanBtn.textContent = "Не является нарушением";
+          } else if (d === "clean") {
+            markBtn.disabled = false;
+            markBtn.classList.remove("done");
+            markBtn.textContent = "Зафиксировать нарушение ИБ";
+            cleanBtn.disabled = true;
+            cleanBtn.classList.add("done");
+            cleanBtn.textContent = "Отмечено: не нарушение";
+          } else {
+            markBtn.disabled = false;
+            markBtn.classList.remove("done");
+            markBtn.textContent = "Зафиксировать нарушение ИБ";
+            cleanBtn.disabled = false;
+            cleanBtn.classList.remove("done");
+            cleanBtn.textContent = "Не является нарушением";
+          }
+          return;
+        }
+
+        if (isNotebookKey(key)) {
+          const n = NOTEBOOK[key];
+          if (d === "violation") {
+            modalHint.textContent = n.wrongViolationHint;
+            modalHint.classList.remove("hidden");
+          }
+          if (d === "clean") {
+            markBtn.disabled = true;
+            markBtn.classList.add("done");
+            markBtn.textContent = "Не оформляем";
+            cleanBtn.disabled = true;
+            cleanBtn.classList.add("done");
+            cleanBtn.textContent = n.cleanLabel;
+          } else if (d === "violation") {
+            markBtn.disabled = false;
+            markBtn.classList.remove("done");
+            markBtn.textContent = "Зафиксировать нарушение ИБ";
+            cleanBtn.disabled = false;
+            cleanBtn.classList.remove("done");
+            cleanBtn.textContent = "Не является нарушением";
+          } else {
+            markBtn.disabled = false;
+            markBtn.classList.remove("done");
+            markBtn.textContent = "Зафиксировать нарушение ИБ";
+            cleanBtn.disabled = false;
+            cleanBtn.classList.remove("done");
+            cleanBtn.textContent = "Не является нарушением";
+          }
+        }
+      }
+
+      function updateProgress() {
+        violationCount.textContent = String(countViolationsMarked());
+        syncHotspotViewedState();
+        if (auditComplete()) {
+          finalePanel.classList.remove("hidden");
+          finalePanel.classList.add("success");
+          finaleText.textContent =
+            "Все нарушения зафиксированы, блокнот с обычными записями отнесён к не нарушению. Имеет смысл оформить служебную записку и провести инструктаж с Иваном Ивановичем: блокировка сессии, запрет паролей на стикерах и в открытом виде, работа с персональными данными только в защищённых системах.";
+        } else {
+          finalePanel.classList.add("hidden");
+          finalePanel.classList.remove("success");
+        }
+      }
+
+      function closeModal() {
+        modal.classList.add("hidden");
+        currentKey = null;
+        magnified = false;
+        memoStickerZoomed = false;
+        modalActionsBar.classList.remove("hidden");
+        modalBody.innerHTML = "";
+        modalHint.classList.add("hidden");
+      }
+
+      function renderScreenModal() {
+        const wrap = document.createElement("div");
+        wrap.className = "modal-visual";
+        const shell = document.createElement("div");
+        shell.className = "outlook-shell";
+        const rail = document.createElement("div");
+        rail.className = "outlook-rail";
+        rail.innerHTML =
+          "<div>Почта</div><div>Календарь</div><div>Люди</div><div>…</div>";
+        const main = document.createElement("div");
+        main.className = "outlook-main";
+        const inner = document.createElement("div");
+        inner.className = "outlook-mini" + (magnified ? " magnified" : "");
+        if (!magnified) {
+          inner.innerHTML =
+            "<div class='ol-title'>Входящие</div>" +
+            "<div style='opacity:.75;font-size:7px'>Письма мелким шрифтом…</div>";
+          const loupe = document.createElement("button");
+          loupe.type = "button";
+          loupe.className = "loupe-btn";
+          loupe.setAttribute("aria-label", "Приблизить лупой");
+          loupe.textContent = "🔍";
+          loupe.addEventListener("click", function (e) {
+            e.stopPropagation();
+            magnified = true;
+            renderScreenModal();
+            syncModalButtons();
+          });
+          inner.appendChild(loupe);
+        } else {
+          inner.innerHTML =
+            "<div class='ol-title'>Microsoft Outlook</div>" +
+            "<div style='font-size:11px;color:#64748b;margin-bottom:8px'>От: security@company.internal</div>" +
+            "<div style='font-weight:700;color:#0f172a;margin-bottom:8px'>FW: Договор ООО «Север» — паспорт сделки, реквизиты</div>" +
+            "<div style='font-size:13px;line-height:1.5;color:#334155'>Коллеги, во вложении сканы договора и список ФИО клиентов с ИНН. Пароль от архива в отдельном письме не дублировать в чатах.</div>";
+        }
+        main.appendChild(inner);
+        shell.appendChild(rail);
+        shell.appendChild(main);
+        wrap.appendChild(shell);
+        modalBody.innerHTML = "";
+        modalBody.appendChild(wrap);
+      }
+
+      function renderStickerModal() {
+        const wrap = document.createElement("div");
+        wrap.className = "modal-visual sticker-zoom";
+        wrap.innerHTML =
+          "VPN / почта<br>ivanovII<br><span style='color:#b91c1c'>Пароль: Zima2026!</span>";
+        modalBody.innerHTML = "";
+        modalBody.appendChild(wrap);
+      }
+
+      function renderPhoneModal() {
+        const wrap = document.createElement("div");
+        wrap.className = "modal-visual phone-ui";
+        wrap.innerHTML =
+          "<div class='phone-notch'></div>" +
+          "<div class='phone-status'>09:41</div>" +
+          "<button type='button' class='shade-toggle' id='shadeBtn'>Опустить шторку уведомлений</button>" +
+          "<div class='notifications' id='notifBlock'>" +
+          "<div class='notif'><strong>Сообщение</strong>Банк: одноразовый пароль для входа в ИБ: <span style='color:#fde68a'>482091</span>. Никому не сообщайте.</div>" +
+          "</div>";
+        modalBody.innerHTML = "";
+        modalBody.appendChild(wrap);
+        const shadeBtn = document.getElementById("shadeBtn");
+        const notifBlock = document.getElementById("notifBlock");
+        shadeBtn.addEventListener("click", function () {
+          notifBlock.classList.toggle("open");
+          shadeBtn.textContent = notifBlock.classList.contains("open")
+            ? "Свернуть шторку"
+            : "Опустить шторку уведомлений";
+        });
+      }
+
+      function renderDiaryModal() {
+        const wrap = document.createElement("div");
+        wrap.className = "modal-visual diary-page";
+        wrap.innerHTML =
+          "<div class='line'><strong>15.04</strong> — созвон с ИБ</div>" +
+          "<div class='line'>Wi-Fi гость: <em>Guest_WiFi</em> / <span style='color:#b91c1c'>пароль: welcome12345</span></div>" +
+          "<div class='line'>Корп. портал: логин ivanov_ii — <span style='color:#b91c1c'>пароль храню тут же: Qwerty!77</span></div>" +
+          "<div class='line'>Не забыть: сменить пароль (не сделал)</div>";
+        modalBody.innerHTML = "";
+        modalBody.appendChild(wrap);
+      }
+
+      function renderPaperModal() {
+        const wrap = document.createElement("div");
+        const doc = document.createElement("div");
+        doc.className = "paper-doc";
+        doc.innerHTML =
+          "<strong>Внутренне. Клиентская база (фрагмент)</strong>" +
+          "<table><thead><tr><th>Клиент</th><th>ИНН</th><th>Телефон</th></tr></thead><tbody>" +
+          "<tr><td>ООО Ромашка</td><td>7701234567</td><td>+7 (495) 000-11-22</td></tr>" +
+          "<tr><td>ИП Сидоров А.В.</td><td>500100732259</td><td>+7 (916) 555-44-33</td></tr>" +
+          "<tr><td>АО Техно</td><td>7709988776</td><td>+7 (812) 333-22-11</td></tr>" +
+          "</tbody></table>";
+        wrap.className = "modal-visual";
+        wrap.appendChild(doc);
+        modalBody.innerHTML = "";
+        modalBody.appendChild(wrap);
+      }
+
+      function renderNotebookModal() {
+        const wrap = document.createElement("div");
+        wrap.className = "modal-visual notebook-modal";
+        wrap.innerHTML =
+          "<h3>Записи на сегодня</h3>" +
+          "<ul>" +
+          "<li>Купить молоко по дороге домой</li>" +
+          "<li>10:30 — напомнить коллеге про отчёт (без вложений)</li>" +
+          "<li>Обед: столовая, вторник — гречка</li>" +
+          "<li>Позвонить маме вечером</li>" +
+          "</ul>";
+        modalBody.innerHTML = "";
+        modalBody.appendChild(wrap);
+      }
+
+      function openModal(key) {
+        currentKey = key;
+        magnified = key === "screen" ? magnified : false;
+        modalBody.innerHTML = "";
+        modalActionsBar.classList.remove("hidden");
+        modalHint.classList.add("hidden");
+        if (isMemoStickerKey(key)) {
+          memoStickerZoomed = false;
+          modalTitle.textContent = "Стикер-напоминание";
+          modalCaption.textContent =
+            "Обычная пометка на мониторе — в этом сценарии не является нарушением ИБ.";
+          renderMemoStickerModal();
+          modalActionsBar.classList.add("hidden");
+          modal.classList.remove("hidden");
+          return;
+        }
+        if (isViolationKey(key)) {
+          const v = VIOLATIONS[key];
+          modalTitle.textContent = v.title;
+          modalCaption.textContent = v.caption;
+          if (key === "screen") renderScreenModal();
+          else if (key === "sticker") renderStickerModal();
+          else if (key === "phone") renderPhoneModal();
+          else if (key === "diary") renderDiaryModal();
+          else if (key === "paper") renderPaperModal();
+        } else if (isNotebookKey(key)) {
+          const n = NOTEBOOK[key];
+          modalTitle.textContent = n.title;
+          modalCaption.textContent = n.caption;
+          renderNotebookModal();
+        }
+        syncModalButtons();
+        modal.classList.remove("hidden");
+      }
+
+      markBtn.addEventListener("click", function () {
+        if (!currentKey) return;
+        const key = currentKey;
+        if (isNotebookKey(key)) {
+          if (decisions[key] === "clean") return;
+          decisions[key] = "violation";
+          syncModalButtons();
+          updateProgress();
+          return;
+        }
+        if (decisions[key] === "violation") return;
+        decisions[key] = "violation";
+        syncModalButtons();
+        updateProgress();
+      });
+
+      cleanBtn.addEventListener("click", function () {
+        if (!currentKey) return;
+        const key = currentKey;
+        if (isNotebookKey(key)) {
+          if (decisions[key] === "clean") return;
+          decisions[key] = "clean";
+          syncModalButtons();
+          updateProgress();
+          return;
+        }
+        if (decisions[key] === "violation") return;
+        decisions[key] = "clean";
+        syncModalButtons();
+        updateProgress();
+      });
+
+      modalClose.addEventListener("click", closeModal);
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      startBtn.addEventListener("click", function () {
+        introPanel.classList.add("hidden");
+        gameBlock.classList.remove("hidden");
+      });
+
+      document.getElementById("hsScreen").addEventListener("click", function () {
+        magnified = false;
+        openModal("screen");
+      });
+      document.getElementById("hsSticker").addEventListener("click", function () {
+        openModal("sticker");
+      });
+      document.getElementById("hsStickerMemoA").addEventListener("click", function () {
+        openModal("stickerMemoA");
+      });
+      document.getElementById("hsStickerMemoB").addEventListener("click", function () {
+        openModal("stickerMemoB");
+      });
+      document.getElementById("hsPhone").addEventListener("click", function () {
+        openModal("phone");
+      });
+      document.getElementById("hsDiary").addEventListener("click", function () {
+        openModal("diary");
+      });
+      document.getElementById("hsPaper").addEventListener("click", function () {
+        openModal("paper");
+      });
+      document.getElementById("hsNotebook").addEventListener("click", function () {
+        openModal("notebook");
+      });
+
+      document.getElementById("hsPlant").addEventListener("click", function () {
+        if (plantGraphicEl.classList.contains("dropped")) return;
+        plantGraphicEl.classList.add("dropped");
+      });
+      document.getElementById("hsFrame").addEventListener("click", function () {
+        openPhotoModal();
+      });
+      document.getElementById("photoModalClose").addEventListener("click", closePhotoModal);
+      photoModalEl.addEventListener("click", function (e) {
+        if (e.target === photoModalEl) closePhotoModal();
+      });
+
+      document.getElementById("hsWaterCan").addEventListener("click", onWaterCanClick);
+      document.getElementById("waterModalClose").addEventListener("click", closeWaterModal);
+      waterModalEl.addEventListener("click", function (e) {
+        if (e.target === waterModalEl) closeWaterModal();
+      });
+      initWallCalendar();
+
+      updateProgress();
+    })();
+  </script>
+</html>
