@@ -1691,6 +1691,9 @@
       left: 5px;
       right: auto;
     }
+    .modal.modal--layer-top {
+      z-index: 10000;
+    }
     .modal {
       position: fixed;
       inset: 0;
@@ -2230,6 +2233,14 @@
       gap: 10px;
       margin-top: 6px;
     }
+    a.btn.success-modal-cta {
+      display: block;
+      width: 100%;
+      margin-top: 0;
+      text-align: center;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
     .modal-hint {
       margin: 12px 0 0;
       padding: 12px 14px;
@@ -2544,6 +2555,19 @@
     </div>
   </div>
 
+  <div class="modal modal--layer-top hidden" id="successModal" role="dialog" aria-modal="true" aria-labelledby="successModalTitle">
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="successModalClose" aria-label="Закрыть">×</button>
+      <h2 id="successModalTitle">Задание выполнено</h2>
+      <p class="caption" id="successModalText">
+        Вы нашли все нарушения в этом сценарии. Отличная работа — вы настоящий мастер информационной безопасности!
+      </p>
+      <div class="modal-actions">
+        <a class="btn success-modal-cta" href="https://lms.reso.ru/view/1-b87wh-C5z2g-YMyCE">Продолжить обучение</a>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const VIOLATIONS = {
@@ -2625,7 +2649,10 @@
       const violationStars = document.getElementById("violationStars");
       const finalePanel = document.getElementById("finalePanel");
       const finaleText = document.getElementById("finaleText");
+      const successModal = document.getElementById("successModal");
+      const successModalClose = document.getElementById("successModalClose");
 
+      let allViolationsCelebrationShown = false;
       let currentKey = null;
       let magnified = false;
       let photoAuditNagShown = false;
@@ -3090,6 +3117,10 @@
           );
         }
         syncHotspotViewedState();
+        if (vn === 5 && !allViolationsCelebrationShown) {
+          allViolationsCelebrationShown = true;
+          openAuditSuccessModal();
+        }
         if (auditComplete()) {
           finalePanel.classList.remove("hidden");
           finalePanel.classList.add("success");
@@ -3108,6 +3139,17 @@
         modalActionsBar.classList.remove("hidden");
         modalBody.innerHTML = "";
         modalHint.classList.add("hidden");
+      }
+
+      function closeSuccessModal() {
+        successModal.classList.add("hidden");
+      }
+
+      function openAuditSuccessModal() {
+        closeModal();
+        closePhotoModal();
+        closeWaterModal();
+        successModal.classList.remove("hidden");
       }
 
       function renderScreenModal() {
@@ -3430,6 +3472,10 @@
       document.getElementById("waterModalClose").addEventListener("click", closeWaterModal);
       waterModalEl.addEventListener("click", function (e) {
         if (e.target === waterModalEl) closeWaterModal();
+      });
+      successModalClose.addEventListener("click", closeSuccessModal);
+      successModal.addEventListener("click", function (e) {
+        if (e.target === successModal) closeSuccessModal();
       });
       initWallCalendar();
       initMouseDrag();
